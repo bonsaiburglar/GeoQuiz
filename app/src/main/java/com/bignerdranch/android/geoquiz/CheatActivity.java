@@ -10,11 +10,15 @@ import android.widget.TextView;
 
 public class CheatActivity extends AppCompatActivity {
 
-    private static final String EXTRA_ANSWER_IS_TRUE = "com.bignerdranch.android.geoquiz.answer_is_true";
-    private static final String EXTRA_ANSWER_SHOWN = "com.bignerdranch.android.geoquiz.answer.shown";
+    public static final String EXTRA_ANSWER_IS_TRUE = "com.bignerdranch.android.geoquiz.answer_is_true";
+    public static final String EXTRA_ANSWER_SHOWN = "com.bignerdranch.android.geoquiz.answer_shown";
+    public static final String EXTRA_INDEX = "com.bignerdranch.android.geoquiz.question_index";
+    private static final String KEY_CHEAT_FLAG = "cheat";
     private boolean mAnswerIsTrue;
+    private boolean mAnswerRevealed;
     private TextView mAnswerTextView;
     private Button mShowAnswer;
+    private int mCheatIndex;
 
     public static Intent newIntent(Context packageContext, boolean answerIsTrue) {
         Intent i = new Intent(packageContext, CheatActivity.class);
@@ -33,6 +37,8 @@ public class CheatActivity extends AppCompatActivity {
 
         mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
 
+        mCheatIndex = getIntent().getIntExtra(EXTRA_INDEX, -1);
+
         mAnswerTextView = (TextView) findViewById(R.id.answer_text_view);
 
         mShowAnswer = (Button) findViewById(R.id.show_answer_button);
@@ -47,11 +53,28 @@ public class CheatActivity extends AppCompatActivity {
                 setAnswerShownResult(true);
             }
         });
+
+        if (savedInstanceState != null){
+            setAnswerShownResult(savedInstanceState.getBoolean(KEY_CHEAT_FLAG, false));
+            if (mAnswerIsTrue) {
+                mAnswerTextView.setText(R.string.true_button);
+            } else {
+                mAnswerTextView.setText(R.string.false_button);
+            }
+        }
     }
 
     private void setAnswerShownResult(boolean isAnswerShown) {
         Intent data = new Intent();
         data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
         setResult(RESULT_OK, data);
+        data.putExtra(EXTRA_INDEX, mCheatIndex);
+        mAnswerRevealed = isAnswerShown;
+    }
+
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putBoolean(KEY_CHEAT_FLAG, mAnswerRevealed);
+
     }
 }
